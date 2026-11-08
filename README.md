@@ -1,9 +1,9 @@
-# CoreSpec
+# Arcana
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![ShellCheck](https://github.com/Htunn/CoreSpec/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/Htunn/CoreSpec/actions/workflows/shellcheck.yml)
+[![ShellCheck](https://github.com/Htunn/Arcana/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/Htunn/Arcana/actions/workflows/shellcheck.yml)
 
-**CoreSpec** — *The Core Spec-Driven Development Framework for AI Agents*
+**Arcana** — *The Spec-Driven Development Framework for AI Agents*
 
 A set of shared role definitions implementing a spec-driven development workflow.
 Supports two AI coding platforms: **Claude Code** (fully automated orchestration) and **GitHub Copilot** (manual checklist workflow).
@@ -50,7 +50,7 @@ This sequence matters because the cost of changing a spec is near zero; the cost
 | `product-manager` | Senior Product Manager | Problem statements, user personas, user stories, acceptance criteria, success metrics |
 | `software-architect` | Software Architect | Feature specs, API contracts, ADRs, data models |
 | `platform-architect` | Platform Architect | Infrastructure, SLOs, observability, deployment |
-| `devsecops-architect` | DevSecOps Architect | Threat model, auth, compliance, CI/CD security gates |
+| `devsecops-architect` | DevSecOps Architect | Threat model, auth, compliance, CI/CD security gates, SDRs |
 | `backend-engineer` | Senior Backend SE | Implements server-side from approved spec |
 | `frontend-engineer` | Senior Frontend SE | Implements UI from approved spec |
 | `mobile-app-engineer` | Senior Mobile App Engineer | iOS, Android, React Native, and Flutter apps: offline-first sync, push, permissions, secure on-device storage, store release builds, implemented from an approved spec |
@@ -73,8 +73,8 @@ This sequence matters because the cost of changing a spec is near zero; the cost
 ### Install
 
 ```bash
-git clone git@github.com:Htunn/CoreSpec.git
-cd CoreSpec
+git clone git@github.com:Htunn/Arcana.git
+cd Arcana
 chmod +x install.sh
 ./install.sh
 ```
@@ -92,7 +92,7 @@ Pass `--keep-attribution` to skip this. To install into a repository instead of 
 ### Update
 
 ```bash
-cd CoreSpec
+cd Arcana
 git pull
 ./install.sh
 ```
@@ -134,7 +134,7 @@ To install into a repository instead, run `./install-copilot.sh --project /path/
 ### Update
 
 ```bash
-cd CoreSpec
+cd Arcana
 git pull
 ./install-copilot.sh
 ```
@@ -286,10 +286,27 @@ Use ai-engineer to implement specs/SPEC-005-rag-pipeline.md
     SPEC-001-deviations.md      # QA deviation report
   docs/
     adr/
-      ADR-001-{slug}.md         # Architecture Decision Records
+      ADR-001-{slug}.md         # Architecture Decision Records (software + platform architects)
+    sdr/
+      SDR-001-{slug}.md         # Security Decision Records: controls, risk acceptances, exceptions (devsecops-architect)
 ```
 
-The spec itself follows [templates/SPEC-template.md](templates/SPEC-template.md). Every goal, non-goal, story, criterion, and open question has a stable ID (`G-`, `NG-`, `US-`, `AC-`, `OQ-`); tasks, test cases, and deviations cite the `AC-` IDs, so any criterion can be traced to its tasks and tests.
+The spec itself follows [templates/SPEC-template.md](templates/SPEC-template.md). Every goal, non-goal, story, criterion, and open question has a stable ID (`G-`, `NG-`, `US-`, `AC-`, `OQ-`); tasks, test cases, and deviations cite the `AC-` IDs, so any criterion can be traced to its tasks and tests. The spec's `## Decision Records` table lists the ADRs and SDRs it created or depends on.
+
+### How this maps to GitHub Spec Kit
+
+Arcana keeps the same spec-first discipline as [GitHub Spec Kit](https://github.com/github/spec-kit) but uses a single spec file and a mandatory human gate (see [ADR-002](docs/adr/ADR-002-single-file-spec-with-stable-ids.md)).
+
+| Spec Kit step | Arcana equivalent |
+|---------------|---------------------|
+| Constitution | Optional `specs/CONSTITUTION.md` (Phase 0), exceptions recorded as ADR/SDR |
+| Specify | Phases 0–1: `product-manager`, with `[NEEDS CLARIFICATION]` markers |
+| Clarify | Phase 0 questions and the open-questions loop before the gate |
+| Plan (research, data model, contracts) | Phase 2: Technical Design with `### Research & Assumptions`, plus ADRs and SDRs |
+| Checklist ("unit tests" for requirements) | Requirements quality check in Phase 2 |
+| Analyze | Consistency pass before the gate; coverage analysis of the task list at the start of Phase 5 |
+| Tasks | `SPEC-NNN-tasks.md`, contracts → tests → implementation, `[P]` for parallel |
+| Implement | Phase 5, then review (6), QA (7), sign-off (8), release (9) |
 
 ## How the Workflow Works
 
@@ -334,10 +351,10 @@ The workflow has ten phases (0–9). The first four exist to make the rest cheap
 |-------|------|--------|
 | 0 | spec-driver | Asks the discovery questions and confirms them with you |
 | 1 | product-manager | Problem statement, user personas, user stories, acceptance criteria, success metrics |
-| 2 | software-architect | Technical design, API contracts, data model, sequence diagrams |
-| 2 | platform-architect | Infrastructure & Operations section: compute, SLOs, observability, deployment |
-| 2 | devsecops-architect | Security Requirements section: STRIDE, auth, data classification, CI/CD gates |
-| 3 | **You** | Review the completed spec and explicitly approve it |
+| 2 | software-architect | Technical design, API contracts, data model, sequence diagrams, research & assumptions, ADRs |
+| 2 | platform-architect | Infrastructure & Operations section: compute, SLOs, observability, deployment; ADRs for costly-to-reverse infrastructure choices |
+| 2 | devsecops-architect | Security Requirements section: STRIDE, auth, data classification, CI/CD gates; SDRs for security decisions and accepted risk |
+| 3 | **You** | Review the completed spec and its decision records, then explicitly approve (records become `Accepted`) |
 | 4 | qa-engineer | Test plan mapping every acceptance criterion to test cases |
 | 5 | backend / frontend / mobile / data / ml / ai / platform engineers | Implementation that matches the spec exactly |
 | 6 | code-reviewer (+ pentester when in scope) | `SPEC-NNN-review.md` — severity-rated security, refactoring, and maintainability findings |
@@ -355,10 +372,13 @@ A spec that passes Phase 3 must have:
 - Infrastructure section present
 - Security section present (threat model + auth + data classification)
 - A clean consistency pass: no contradictions between design, infrastructure, and security, and no conflict with the project constitution (or a recorded exception)
+- Every significant decision recorded as an ADR or SDR, listed under Decision Records, with irreversible choices and accepted risk named for your approval
 
 If any of these are missing, the spec goes back. It does not proceed.
 
-Before the gate, `spec-driver` reads the whole spec once and reports contradictions and gaps (for example an SLO the design cannot meet, or an error code with no matching criterion). After the gate, Phase 5 starts by deriving a task list from the approved spec: contracts first, then tests, then implementation, with parallel-safe tasks marked `[P]`.
+Open questions follow the ADR style: each lists 2–4 options with one recommendation prefilled as the default answer, so you only confirm it, pick another option, or write a custom answer. A recommendation is not an answer until you confirm it.
+
+Before the gate, `spec-driver` runs a requirements quality check (measurable goals, runnable criteria, no implementation terms in business sections), then reads the whole spec once and reports contradictions and gaps (for example an SLO the design cannot meet, or an error code with no matching criterion). After the gate, Phase 5 starts by deriving a task list from the approved spec: contracts first, then tests, then implementation, with parallel-safe tasks marked `[P]`. The task list is checked for coverage of every acceptance criterion, security requirement, and accepted decision before work begins.
 
 ---
 
@@ -462,46 +482,38 @@ The number is sequential. The slug describes the decision, not the system: `use-
 
 ### ADR template
 
+The canonical copy is [templates/ADR-template.md](templates/ADR-template.md); `software-architect` embeds the same text.
+
 ```markdown
 # ADR-NNN: {Decision Title}
-
 - **Status**: Proposed | Accepted | Deprecated | Superseded by ADR-NNN
 - **Date**: YYYY-MM-DD
-- **Authors**: [names or roles]
-- **Deciders**: [who made the final call]
+- **Deciders**: [names or roles who own the decision]
+- **Related**: [SPEC-NNN, ADR-NNN, SDR-NNN — or "none"]
+- **Reversibility**: Reversible | Costly to reverse | Irreversible — [one sentence on why]
 
 ## Context
+[What forces are in play — technical, business, team. Written so a reader two years from now, without the original conversations, can see why this decision made sense.]
 
-[What forces are in play — technical constraints, team constraints, product
-requirements, deadline pressure, compliance requirements.
-Write this as the situation a new engineer would need to understand to
-evaluate the decision independently.]
+## Decision Drivers
+- [The requirement, constraint, or quality attribute that shaped the choice — cite `AC-`, `G-`, or constitution principle IDs where they exist]
 
 ## Decision
-
-[The choice made, stated plainly.
-"We will use X" — not "we considered using X."]
+[The choice made, stated in one or two sentences, in the active voice: "We will …". While the ADR is `Proposed`, prefill this with the recommended option and list the others under Alternatives Rejected; the human confirms or overrides it at the review gate.]
 
 ## Consequences
-
 ### Positive
-- [What becomes easier or possible because of this decision]
+- [What becomes easier]
 
 ### Negative
-- [What becomes harder, slower, or constrained — be honest]
-
-### Risks
-- [What could go wrong, and how we plan to detect it]
+- [What becomes harder or constrained — every ADR has at least one]
 
 ## Alternatives Rejected
-
 ### Option: [Name]
-- **Why considered**: [what made it a real candidate]
-- **Why rejected**: [the specific reason it lost — be concrete, not vague]
+[Why it was not chosen.]
 
-### Option: [Name]
-- **Why considered**: …
-- **Why rejected**: …
+## Confirmation
+[How conformance is verified: a test, fitness function, review check, or "none — judgement call". Name the owner and a review date for decisions that may age out.]
 ```
 
 ### Writing a good Context section
@@ -528,10 +540,10 @@ Proposed  →  Accepted  →  Deprecated
                        →  Superseded by ADR-NNN
 ```
 
-- **Proposed**: written but not yet agreed
-- **Accepted**: the team has agreed this is the current approach
+- **Proposed**: written but not yet agreed. In the spec workflow, ADRs start here in Phase 2
+- **Accepted**: the team has agreed this is the current approach. Approving the spec at the Phase 3 gate accepts its ADRs
 - **Deprecated**: no longer relevant (the system it described no longer exists)
-- **Superseded**: a later ADR replaces this one — link to it
+- **Superseded**: a later ADR replaces this one — link to it. Never edit the decision of an `Accepted` ADR; write a new one
 
 Always update the status. A stale ADR marked `Proposed` for two years is worse than no ADR because it implies nothing was ever decided.
 
@@ -544,6 +556,37 @@ Always update the status. A stale ADR marked `Proposed` for two years is worse t
 | `microservices.md` | `ADR-007-split-billing-into-separate-service.md` |
 
 The title should describe the decision, not the topic. Someone scanning a list of ADRs should be able to understand the decision without opening the file.
+
+Arcana follows its own rules: see [docs/adr/](docs/adr/) for the decisions behind this repository.
+
+---
+
+## How to Write an SDR
+
+A Security Decision Record (SDR) is an ADR for security. A spec's Security Requirements say what must hold; an SDR records *why* a security-relevant choice was made and, when risk is left over, who accepted it and until when. SDRs are owned by `devsecops-architect`, live in `docs/sdr/SDR-NNN-{slug}.md`, and use [templates/SDR-template.md](templates/SDR-template.md).
+
+### When to write an SDR
+
+| Type | Write one when |
+|------|----------------|
+| **Control** | You choose an authentication or authorisation model, token or session design, cryptographic algorithm or key custody, trust boundary, tenant isolation, or data-residency approach |
+| **Risk Acceptance** | A Medium or Low finding from code review or pentest is deferred instead of fixed, or a threat-model row is left without a mitigation |
+| **Exception** | The design breaks a security principle in `specs/CONSTITUTION.md`, or skips a CI/CD gate the spec otherwise requires |
+
+Routine hardening already covered by the Security Requirements section does not need an SDR. Non-security architecture choices belong in an ADR.
+
+### What makes it different from an ADR
+
+- **Threats and Assets**: ties the decision to STRIDE rows in the spec or to review finding IDs
+- **Security Controls**: maps each control to a standard (OWASP ASVS, SOC2, PCI-DSS, …) and says how it is verified
+- **Residual Risk**: likelihood, impact, rating, and a named person who accepted it
+- **Review by**: Risk Acceptances and Exceptions expire. A lapsed date means the SDR is stale: re-review it, renew it with a new SDR, or fix the underlying risk
+
+### SDR lifecycle
+
+Same statuses as an ADR: `Proposed` in Phase 2, `Accepted` when the human approves the spec, `Superseded by SDR-NNN` when replaced. A Critical or High residual risk is never accepted on the human's behalf; it is named at the Phase 3 gate. Findings that Phase 6 defers become Risk Acceptance SDRs. `code-reviewer` flags code that contradicts an `Accepted` SDR and any SDR past its `Review by` date.
+
+See [docs/sdr/](docs/sdr/) for this repository's own security decisions.
 
 ---
 
@@ -560,12 +603,12 @@ The tools' own settings are disabled too, so attribution doesn't come back throu
 
 ## Enterprise deployment
 
-CoreSpec is plain Markdown and JSON with no network calls or executables in the agents/skills, so it can be reviewed, mirrored to an internal Git server, and pinned like any other dependency. Choose the channel that matches how your organization manages AI tooling:
+Arcana is plain Markdown and JSON with no network calls or executables in the agents/skills, so it can be reviewed, mirrored to an internal Git server, and pinned like any other dependency. Choose the channel that matches how your organization manages AI tooling:
 
 | Channel | Scope | How |
 |---|---|---|
 | **Repository** | Everyone who clones a repo | `./install.sh --project <repo>` and `./install-copilot.sh --project <repo>`, then commit `.claude/` and `.github/skills/` |
-| **Claude Code plugin marketplace** | Org-wide, versioned via Git | This repo is a plugin marketplace ([.claude-plugin/](.claude-plugin/)). Users run `/plugin marketplace add Htunn/CoreSpec` (or your internal mirror) and `/plugin install corespec@corespec`. Agents and skills are namespaced as `corespec:<role>` |
+| **Claude Code plugin marketplace** | Org-wide, versioned via Git | This repo is a plugin marketplace ([.claude-plugin/](.claude-plugin/)). Users run `/plugin marketplace add Htunn/Arcana` (or your internal mirror) and `/plugin install arcana@arcana`. Agents and skills are namespaced as `arcana:<role>` |
 | **Claude Code managed settings** | Every managed machine | Deploy [enterprise/managed-settings.json](enterprise/managed-settings.json) via MDM, `managed-settings.json`, or server-managed settings. It enforces no-attribution and registers/enables the plugin. Add `strictKnownMarketplaces` to restrict users to approved marketplaces, and point `repo` at your internal mirror |
 | **Claude Code managed agents/skills** | Every managed machine | Copy `agents/*.md` to `.claude/agents/` and `copilot/skills/*` to `.claude/skills/` inside the [managed settings directory](https://code.claude.com/docs/en/managed-settings) |
 | **GitHub Copilot / VS Code** | Per repo or per user | Repository channel above, or `./install-copilot.sh` on each machine; enforce `git.addAICoAuthor: off` through your settings management |
@@ -608,7 +651,9 @@ uninstall-copilot.sh # removes the installed skills (or --project <repo>)
 
 .claude-plugin/      # Claude Code plugin + marketplace manifests (agents/ and copilot/skills/)
 enterprise/          # managed-settings.json and VS Code settings templates for org rollout
-templates/           # SPEC-template.md (canonical spec shape) and constitution.md (optional project principles)
+templates/           # SPEC, ADR, and SDR templates (canonical shapes) and constitution.md (optional project principles)
+docs/adr/            # Arcana's own Architecture Decision Records
+docs/sdr/            # Arcana's own Security Decision Records
 scripts/validate.py  # CI check: front-matter, agent/skill pairing, spec-template sections, workflow phases
 
 LICENSE              # MIT License
@@ -637,4 +682,4 @@ how to privately report a vulnerability. All shell scripts are linted with
 
 ## License
 
-CoreSpec is licensed under the [MIT License](LICENSE).
+Arcana is licensed under the [MIT License](LICENSE).

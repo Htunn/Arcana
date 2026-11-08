@@ -5,7 +5,7 @@ argument-hint: "[infrastructure task or spec path]"
 license: MIT
 metadata:
   author: Htunn
-  source: https://github.com/Htunn/CoreSpec
+  source: https://github.com/Htunn/Arcana
 ---
 
 You are a Senior Platform Engineer. You write infrastructure code — shell scripts, container configs, Kubernetes manifests, CI/CD pipelines, and observability configuration. Infrastructure code is production code: it is version-controlled, reviewed, and tested before it touches a cluster.

@@ -1,13 +1,13 @@
 {
-  "name": "corespec",
-  "displayName": "CoreSpec",
+  "name": "arcana",
+  "displayName": "Arcana",
   "description": "Spec-driven development roles: product, architecture, platform, security, engineering (backend, frontend, mobile, data, ML), QA, and release agents and skills.",
   "author": {
     "name": "Htunn",
     "url": "https://github.com/Htunn"
   },
-  "homepage": "https://github.com/Htunn/CoreSpec",
-  "repository": "https://github.com/Htunn/CoreSpec",
+  "homepage": "https://github.com/Htunn/Arcana",
+  "repository": "https://github.com/Htunn/Arcana",
   "license": "MIT",
   "keywords": ["spec-driven-development", "architecture", "security", "qa", "release"],
   "skills": "./copilot/skills/"

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate CoreSpec agents, skills, templates, and workflow consistency."""
+"""Validate Arcana agents, skills, templates, and workflow consistency."""
 from __future__ import annotations
 
 import re
@@ -68,6 +68,70 @@ for role in ("software-architect", "product-manager"):
             if f"## {s}" not in text:
                 err(f"{p.relative_to(ROOT)}: spec template section '## {s}' missing")
 
+# The ADR and SDR templates must appear in the roles that own them, and the orchestrator must use them.
+def template_sections(path: str) -> list[str]:
+    return re.findall(r"^## (.+)$", (ROOT / path).read_text(encoding="utf-8"), re.M)
+
+
+ADR_STATUS = r"(Proposed|Accepted|Deprecated|Superseded by ADR-\d{3})"
+SDR_STATUS = r"(Proposed|Accepted|Deprecated|Superseded by SDR-\d{3})"
+records = {
+    "ADR": ("templates/ADR-template.md", "software-architect", "docs/adr", ADR_STATUS, ["Status", "Date", "Deciders", "Related", "Reversibility"]),
+    "SDR": ("templates/SDR-template.md", "devsecops-architect", "docs/sdr", SDR_STATUS, ["Status", "Date", "Type", "Deciders", "Related", "Review by"]),
+}
+for kind, (tpl, owner, folder, status_re, fields) in records.items():
+    tpl_path = ROOT / tpl
+    if not tpl_path.exists():
+        err(f"{tpl}: missing")
+        continue
+    sections_k = template_sections(tpl)
+    for p in (agents.get(owner), skills.get(owner)):
+        if p is None:
+            continue
+        text = p.read_text(encoding="utf-8")
+        for s in sections_k:
+            if f"## {s}" not in text:
+                err(f"{p.relative_to(ROOT)}: {kind} template section '## {s}' missing")
+        if f"{kind}-NNN" not in text:
+            err(f"{p.relative_to(ROOT)}: {kind} template missing")
+        if tpl_path.read_text(encoding="utf-8").strip() not in text:
+            err(f"{p.relative_to(ROOT)}: embedded {kind} template differs from {tpl}")
+    for role in ("spec-driver",):
+        for p in (agents.get(role), skills.get(role)):
+            if p is not None and f"{kind}" not in p.read_text(encoding="utf-8"):
+                err(f"{p.relative_to(ROOT)}: does not mention {kind}s")
+
+    seen: set[str] = set()
+    for rec in sorted((ROOT / folder).glob(f"{kind}-*.md")):
+        rel = rec.relative_to(ROOT)
+        m = re.match(rf"{kind}-(\d{{3}})-[a-z0-9]+(-[a-z0-9]+)*\.md$", rec.name)
+        if not m:
+            err(f"{rel}: file name must be {kind}-NNN-kebab-slug.md")
+            continue
+        num = m.group(1)
+        if num in seen:
+            err(f"{rel}: duplicate {kind} number {num}")
+        seen.add(num)
+        text = rec.read_text(encoding="utf-8")
+        if not re.search(rf"^# {kind}-{num}: .+", text, re.M):
+            err(f"{rel}: title must be '# {kind}-{num}: …'")
+        for s in sections_k:
+            if f"## {s}" not in text:
+                err(f"{rel}: section '## {s}' missing")
+        for f in fields:
+            if not re.search(rf"^- \*\*{f}\*\*: .+", text, re.M):
+                err(f"{rel}: metadata field '{f}' missing")
+        sm = re.search(r"^- \*\*Status\*\*: (.+)$", text, re.M)
+        if sm and not re.fullmatch(status_re, sm.group(1).strip()):
+            err(f"{rel}: invalid status '{sm.group(1).strip()}'")
+        if kind == "SDR":
+            tm = re.search(r"^- \*\*Type\*\*: (.+)$", text, re.M)
+            rv = re.search(r"^- \*\*Review by\*\*: (.+)$", text, re.M)
+            if tm and tm.group(1).strip() not in ("Control", "Risk Acceptance", "Exception"):
+                err(f"{rel}: invalid type '{tm.group(1).strip()}'")
+            if tm and tm.group(1).strip() != "Control" and rv and not re.match(r"\d{4}-\d{2}-\d{2}", rv.group(1).strip()):
+                err(f"{rel}: Risk Acceptance and Exception need a 'Review by' date")
+
 # The orchestrator must define the same phases in the agent, the skill, and the README.
 def phases(text: str) -> set[str]:
     return set(re.findall(r"^#{2,3} Phase (\d+)", text, re.M))
@@ -92,4 +156,6 @@ for name in agents:
 if errors:
     print("\n".join(f"ERROR: {e}" for e in errors))
     sys.exit(1)
-print(f"ok: {len(agents)} agents, {len(skills)} skills, {len(sd_agent)} workflow phases")
+n_adr = len(list((ROOT / "docs/adr").glob("ADR-*.md")))
+n_sdr = len(list((ROOT / "docs/sdr").glob("SDR-*.md")))
+print(f"ok: {len(agents)} agents, {len(skills)} skills, {len(sd_agent)} workflow phases, {n_adr} ADRs, {n_sdr} SDRs")

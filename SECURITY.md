@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-CoreSpec follows [Semantic Versioning](https://semver.org/). Only the latest
+Arcana follows [Semantic Versioning](https://semver.org/). Only the latest
 released version (see [VERSION](VERSION) and [CHANGELOG.md](CHANGELOG.md)) is
 actively supported with security fixes.
 
@@ -18,7 +18,7 @@ Please **do not** open a public GitHub issue for security vulnerabilities.
 Instead, report it privately using one of these channels:
 
 1. **GitHub Security Advisories** (preferred): open a draft advisory at
-   [https://github.com/Htunn/CoreSpec/security/advisories/new](https://github.com/Htunn/CoreSpec/security/advisories/new).
+   [https://github.com/Htunn/Arcana/security/advisories/new](https://github.com/Htunn/Arcana/security/advisories/new).
 2. **Email**: contact the maintainer listed on the
    [repository's GitHub profile](https://github.com/Htunn) with a description
    of the issue, steps to reproduce, and potential impact.

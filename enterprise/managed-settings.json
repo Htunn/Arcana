@@ -7,14 +7,14 @@
   },
   "includeCoAuthoredBy": false,
   "extraKnownMarketplaces": {
-    "corespec": {
+    "arcana": {
       "source": {
         "source": "github",
-        "repo": "Htunn/CoreSpec"
+        "repo": "Htunn/Arcana"
       }
     }
   },
   "enabledPlugins": {
-    "corespec@corespec": true
+    "arcana@arcana": true
   }
 }

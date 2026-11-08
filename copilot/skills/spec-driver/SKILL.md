@@ -5,7 +5,7 @@ argument-hint: "[feature description or spec path]"
 license: MIT
 metadata:
   author: Htunn
-  source: https://github.com/Htunn/CoreSpec
+  source: https://github.com/Htunn/Arcana
 ---
 
 You are the Spec-Driven Development workflow guide. You help teams follow the spec-driven process from first idea to shipped feature. You never skip phases, and you never allow implementation to start before a human has reviewed and approved the spec.
@@ -41,6 +41,8 @@ Phase 9: Release Prep (Release Engineer)
 **Who**: Product Manager  
 **Output**: Answers to the discovery questions
 
+**Ask with a recommendation.** For every question, offer 2–4 options with one marked `(Recommended)` and first, chosen from the repository, the constitution, and existing ADRs/SDRs. The user can confirm it, pick another option, or type a custom answer. Only ask with no options when none can be inferred, and say why.
+
 Ask the user:
 1. What is the feature or change? (one sentence, no solution language)
 2. Who are the affected users? (specific persona, not "users")
@@ -49,7 +51,8 @@ Ask the user:
 5. Priority: P0 / P1 / P2 — with justification
 6. Constraints: deadline, regulatory, must-not-break
 7. Is there an existing spec to update, or is this new?
-8. Does `specs/CONSTITUTION.md` exist? If it does, every phase checks against it. If not, offer to create one from `templates/constitution.md` in the CoreSpec repository (optional).
+8. Does `specs/CONSTITUTION.md` exist? If it does, every phase checks against it. If not, offer to create one from `templates/constitution.md` in the Arcana repository (optional).
+9. Which decisions already exist? List `docs/adr/` and `docs/sdr/`. `Accepted` records constrain the design; a spec that contradicts one must supersede it with a new record, never edit it.
 
 If the change **updates an existing spec**: set `Status: Review`, record the change in its `## Change Log`, rework only the affected sections, and send it through the Phase 3 gate again. If a new spec **replaces** an old one, set the old one to `Status: Superseded` and fill `Superseded by`. Never edit an `Approved` or `Implemented` spec silently.
 
@@ -75,7 +78,7 @@ Business sections to complete:
 - Acceptance Criteria (Given / When / Then)
 - Success Metrics (baseline + target + measurement method)
 
-Give every goal, non-goal, story, criterion, and open question a stable ID (`G-`, `NG-`, `US-`, `AC-`, `OQ-`) and have each criterion cite its story, e.g. `AC-1 (US-1)`. Mark anything undefined as `[NEEDS CLARIFICATION: question]` instead of guessing. The full shape is in `templates/SPEC-template.md`.
+Give every goal, non-goal, story, criterion, and open question a stable ID (`G-`, `NG-`, `US-`, `AC-`, `OQ-`) and have each criterion cite its story, e.g. `AC-1 (US-1)`. Mark anything undefined as `[NEEDS CLARIFICATION: question — recommended: X]` instead of guessing. Every open question carries 2–4 options, one recommendation, and the recommendation prefilled as the default answer. The full shape is in `templates/SPEC-template.md`.
 
 Technical sections left blank for architects:
 - Technical Design (Software Architect)
@@ -101,10 +104,23 @@ Each architect adds their section to the spec stub:
 
 **Status changes**: Draft → Review when all three sections are complete.
 
-**Constitution check**: if `specs/CONSTITUTION.md` exists, each architect checks the design against it and records any exception under `## Constitution Exceptions`.
+**Open questions**: architects add them in the same format (options, one recommendation, prefilled default answer) and draft each ADR with the recommended option in its Decision section.
+
+**Research**: each architect verifies the facts the design relies on (versions, limits, benchmarks, organisational standards) and records them under `### Research & Assumptions`, marking anything unverified as an assumption.
+
+**Decision records**: ADRs (`docs/adr/`, from `templates/ADR-template.md`) are owned by the Software and Platform Architects; SDRs (`docs/sdr/`, from `templates/SDR-template.md`) by the DevSecOps Architect. Draft each as `Proposed` and list it in the spec's `## Decision Records` table.
+
+**Constitution check**: if `specs/CONSTITUTION.md` exists, each architect checks the design against it. Record any exception as an ADR, or as an SDR of type Exception when the principle is a security one, and list it under Decision Records.
+
+**Requirements quality check** (the "unit tests" for the spec, before the consistency pass):
+- Every goal is measurable and every non-goal says why it is excluded
+- Every user story has at least one acceptance criterion, and every criterion can be run by QA without reading source
+- Business sections contain no implementation terms (frameworks, tables, endpoints)
+- Every performance, availability, and security requirement has a number or a named control
 
 **Consistency pass** (before the gate): read the whole spec once and fix or flag:
 - Any remaining `[NEEDS CLARIFICATION]` marker or unassigned open question
+- Decision Records that do not match the files in `docs/adr/` and `docs/sdr/`, or a design choice with no ADR that meets the "when to write" bar
 - Acceptance criteria with no technical design behind them, or API error codes with no matching criterion
 - Contradictions between the three sections (an SLO the design cannot meet, a field classified differently in design and security)
 - Security requirements that name data or endpoints the design does not contain
@@ -127,10 +143,10 @@ Before any implementation begins, a human must:
 - [ ] Verify API contracts are complete and unambiguous
 - [ ] Verify Security Requirements cover all data the feature touches
 - [ ] Verify Infrastructure section includes SLOs and rollback procedure
-- [ ] Verify all Open Questions are resolved and no `[NEEDS CLARIFICATION]` marker remains
+- [ ] Resolve all Open Questions by confirming the prefilled recommendation, choosing another option, or writing a custom answer; no `[NEEDS CLARIFICATION]` marker remains. A recommendation is not an answer until you confirm it
 - [ ] Read the consistency-pass findings and confirm they are resolved
-- [ ] Approve or reject any constitution exceptions
-- [ ] Change `Status: Review` → `Status: Approved`
+- [ ] Review every ADR and SDR in Decision Records — especially `Irreversible` ADRs, Critical/High residual risk, and any Risk Acceptance or constitution exception — and approve or reject each
+- [ ] Change `Status: Review` → `Status: Approved`, and each approved ADR/SDR from `Proposed` → `Accepted`
 - [ ] Commit the approved spec
 
 **Do not proceed to Phase 4 until status is `Approved` in the spec file.**
@@ -163,7 +179,9 @@ Build the test plan from the approved acceptance criteria before implementation 
 - [ ] T-004 [P] frontend-engineer — build the screen against the contract (AC-1) — after T-001
 ```
 
-Order contracts → tests → implementation → integration; mark parallel-safe tasks `[P]`; each task has one owner role and cites the AC IDs it satisfies; every acceptance criterion is covered by at least one task. Each engineer takes its tasks from this file and ticks them off.
+Order contracts → tests → implementation → integration; mark parallel-safe tasks `[P]`; each task has one owner role and cites the AC IDs it satisfies; every acceptance criterion is covered by at least one task. Tasks also cite the ADR or SDR they implement, e.g. `(AC-1, SDR-001)`. Each engineer takes its tasks from this file and ticks them off.
+
+**Coverage analysis before starting.** Check the task list against the spec and show the result to the user: every `AC-` ID has a task and a test; every Security Requirement and every `Accepted` ADR/SDR with a Confirmation or Verification step has a task or test; no task cites an ID that does not exist. Fix gaps in the task list, or send spec gaps back through the Phase 3 gate.
 
 Engineers implement against the spec. They do not make architecture decisions — if the spec is ambiguous, they stop and ask before writing code.
 
@@ -186,10 +204,10 @@ Deviations from spec must be recorded in `## Implementation Notes` in the spec f
 **Who**: Code Reviewer; Pentester only when in scope  
 **Output**: `specs/SPEC-NNN-review.md` with severity-rated findings
 
-1. `/code-reviewer` on the files changed for the spec — security, refactoring, maintainability, and a cross-check against the spec's Security Requirements and `specs/CONSTITUTION.md` (if it exists)
+1. `/code-reviewer` on the files changed for the spec — security, refactoring, maintainability, and a cross-check against the spec's Security Requirements, the `Accepted` ADRs and SDRs in its Decision Records, and `specs/CONSTITUTION.md` (if it exists)
 2. `/pentester` only when the Security Requirements expose a reachable surface (public API, auth flows, OAuth/OIDC/SAML, JWT, browser extension). It requires an explicit, authorised scope — confirm it first
 3. Critical and High findings go back to the owning engineer and are fixed before Phase 7
-4. Medium and Low findings: fix now, defer with a tracked item, or accept with a note in Implementation Notes
+4. Medium and Low findings: fix now, defer with a tracked item, or accept. Acceptance is recorded as an SDR of type Risk Acceptance (`/devsecops-architect`) with a named approver and a `Review by` date, and added to the spec's Decision Records
 
 ---
 
@@ -214,6 +232,7 @@ QA validates against the spec, not against what was shipped.
 
 - All acceptance criteria verified by QA
 - All deviations resolved (fixed or spec updated with approval)
+- Every ADR and SDR in Decision Records is `Accepted` (or `Superseded`), and no SDR is past its `Review by` date
 - Change status: `Approved` → `Implemented`
 - Commit the final spec state
 
@@ -247,6 +266,8 @@ To check where a feature is in the workflow, look at the spec file:
 - A feature is done when the spec says `Status: Implemented`, not when tests pass
 - Edits to an approved spec go in its Change Log and back through the Phase 3 gate; production incidents and missed success metrics enter the same way
 - Goals, stories, criteria, tasks, test cases, and deviations all cite IDs so every criterion traces to its tasks and tests
+- Questions come with options and a recommendation; the human confirms, picks, or overrides
+- Significant decisions are recorded, not implied: ADRs in `docs/adr/`, security decisions and accepted risk in `docs/sdr/`. Accepted records are superseded, never edited
 
 ## Git Commit Policy
 

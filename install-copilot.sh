@@ -8,7 +8,7 @@ usage() {
   cat <<EOF
 Usage: ./install-copilot.sh [--project <repo-path>]
 
-Installs CoreSpec Agent Skills.
+Installs Arcana Agent Skills.
 
   (default)              User scope: ~/.copilot/skills, \${CLAUDE_CONFIG_DIR:-~/.claude}/skills,
                          ~/.agents/skills

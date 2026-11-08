@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-11-09
+
+### Added
+
+- **Security Decision Records (SDRs)**: `templates/SDR-template.md` and
+  `docs/sdr/`. An SDR records a security control, a risk acceptance, or an
+  exception, with threats addressed, standard mapping, residual risk, a named
+  approver, and a `Review by` date. Owned by `devsecops-architect`.
+- `templates/ADR-template.md`: canonical ADR shape (adds Deciders, Related,
+  Reversibility, Decision Drivers, and Confirmation to the previous template).
+- `docs/adr/` and `docs/sdr/` seeded with Arcana's own decisions (ADR-001–005,
+  SDR-001–002).
+- Spec template: `## Decision Records` table and `### Research & Assumptions`
+  under Technical Design.
+- `scripts/validate.py` checks the ADR and SDR templates, that the owning
+  roles embed them verbatim, and that every record under `docs/adr/` and
+  `docs/sdr/` has a valid name, title, sections, metadata, status, and (for SDR
+  Risk Acceptance and Exception) a review date.
+
+### Changed
+
+- **BREAKING**: project renamed from CoreSpec to Arcana (see
+  [ADR-005](docs/adr/ADR-005-rename-project-to-arcana.md)). The Claude Code
+  plugin and marketplace ID is now `arcana` (install with
+  `/plugin install arcana@arcana`); update any `corespec` entries in
+  `extraKnownMarketplaces` and `enabledPlugins`. The repository moves to
+  `Htunn/Arcana`. Agent and skill names are unchanged.
+- `spec-driver`: drafts ADRs and SDRs as `Proposed` in Phase 2 and accepts them
+  with the spec at the Phase 3 gate. Adds a requirements quality check before
+  the consistency pass, a task-list coverage analysis at the start of Phase 5,
+  and records Phase 6 risk acceptances as SDRs. Phase 8 confirms all records are
+  `Accepted` and no SDR is past its `Review by` date. The phase list is
+  unchanged.
+- `software-architect`, `platform-architect`: ADR guidance covers when to write
+  one, lifecycle, and supersession; constitution exceptions are now ADRs rather
+  than a `## Constitution Exceptions` spec section.
+- `code-reviewer` checks code against `Accepted` ADRs and SDRs and flags lapsed
+  SDR review dates.
+- Open questions (`OQ-` items, `[NEEDS CLARIFICATION]` markers, and questions
+  `spec-driver` asks you) now list 2–4 options with one recommendation prefilled
+  as the default answer; you confirm it, pick another option, or write a custom
+  answer. Proposed ADRs and SDRs prefill their Decision with the recommendation.
+- README documents SDRs and maps Arcana's phases to GitHub Spec Kit steps.
+
 ## [2.0.0] - 2026-10-28
 
 ### Added
@@ -189,8 +233,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Senior Pentester agent covering OWASP Top 10, threat modelling, CVE triage, and
   structured penetration test reports.
 
-[Unreleased]: https://github.com/Htunn/CoreSpec/compare/v2.0.0...HEAD
-[2.0.0]: https://github.com/Htunn/CoreSpec/compare/v1.0.0...v2.0.0
-[1.0.0]: https://github.com/Htunn/CoreSpec/compare/v0.2.0...v1.0.0
+[Unreleased]: https://github.com/Htunn/Arcana/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/Htunn/Arcana/compare/v2.0.0...v3.0.0
+[2.0.0]: https://github.com/Htunn/Arcana/compare/v1.0.0...v2.0.0
+[1.0.0]: https://github.com/Htunn/Arcana/compare/v0.2.0...v1.0.0
 [0.2.0]: https://github.com/htunn/spec-driven-development/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/htunn/spec-driven-development/releases/tag/v0.1.0

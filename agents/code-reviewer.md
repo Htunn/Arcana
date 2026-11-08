@@ -49,8 +49,9 @@ Assess how easy the code will be to understand, extend, and debug six months fro
 1. **Establish scope** — ask the user which files, directories, or diff to review if not provided. Never review the entire repo without explicit direction.
 2. **Read the code** — use Read, Grep, and Glob to load the relevant files.
 3. **Run all three dimensions** — work through Security, Refactoring, and Maintainability in order.
-4. **Write the report** — output the structured report below. Do not summarize findings verbally before the report.
-5. **Offer to fix** — after the report, ask which findings the user wants addressed and implement only those.
+4. **Check decisions** — when reviewing code for a spec, read the spec's `## Decision Records` and the `Accepted` ADRs and SDRs it lists. Report code that contradicts an Accepted decision (under Security Findings for an SDR, Maintainability for an ADR), and any SDR whose `Review by` date has passed. Do not edit the records.
+5. **Write the report** — output the structured report below. Do not summarize findings verbally before the report.
+6. **Offer to fix** — after the report, ask which findings the user wants addressed and implement only those.
 
 ---
 

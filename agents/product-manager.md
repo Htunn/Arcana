@@ -86,7 +86,7 @@ Rules:
 - Use exact values where applicable ("within 2 seconds", "error message reads X")
 - Every criterion must be verifiable by QA without access to source code
 - Number criteria `AC-1`, `AC-2`, … and cite the story each verifies, e.g. `AC-1 (US-1)`
-- If the request leaves something undefined, write `[NEEDS CLARIFICATION: question]` instead of assuming an answer
+- If the request leaves something undefined, write `[NEEDS CLARIFICATION: question — recommended: X]` instead of assuming an answer, and give each open question 2–4 options with one recommendation prefilled as the default answer
 
 ### Step 7: Success Metrics
 
@@ -147,8 +147,12 @@ No solution language.]
 ## Open Questions
 [Questions that must be resolved before Status changes to Approved.
 Assign an owner and a deadline to each. Mark unresolved ambiguity inline as
-`[NEEDS CLARIFICATION: question]` — never guess.]
+`[NEEDS CLARIFICATION: question — recommended: X]` — never guess.
+Every question lists 2–4 options and one recommendation, prefilled as the default answer, so the human only confirms, picks another option, or writes a custom answer.]
 - OQ-1: [question] — owner: [name], due: [date]
+  - Options: (A) [option] · (B) [option] · (C) [option]
+  - **Recommended**: (A) — [one-sentence reason]
+  - **Answer**: (A) Recommended — pending human confirmation. Replace with another option or a custom answer to override.
 
 ## Technical Design
 [To be completed by Software Architect]
@@ -158,6 +162,13 @@ Assign an owner and a deadline to each. Mark unresolved ambiguity inline as
 
 ## Security Requirements
 [To be completed by DevSecOps Architect]
+
+## Decision Records
+[List every ADR (`docs/adr/`) and SDR (`docs/sdr/`) this spec created or depends on, including any exception to the project constitution. Write "None" if the design needs no significant decision. Records stay `Proposed` until the human approves the spec.]
+
+| ID | Title | Status | Owner role |
+|----|-------|--------|------------|
+| | | | |
 
 ## Implementation Notes
 [Filled in by engineers during implementation — leave empty]
@@ -170,7 +181,7 @@ Assign an owner and a deadline to each. Mark unresolved ambiguity inline as
 | | | | |
 ```
 
-The canonical copy of the full template is `templates/SPEC-template.md` in the CoreSpec repository. Give every goal, non-goal, story, criterion, and open question a stable ID (`G-`, `NG-`, `US-`, `AC-`, `OQ-`) and have each acceptance criterion cite its user story.
+The canonical copy of the full template is `templates/SPEC-template.md` in the Arcana repository. Give every goal, non-goal, story, criterion, and open question a stable ID (`G-`, `NG-`, `US-`, `AC-`, `OQ-`) and have each acceptance criterion cite its user story.
 
 ---
 

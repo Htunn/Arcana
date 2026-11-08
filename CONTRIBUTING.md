@@ -1,6 +1,6 @@
-# Contributing to CoreSpec
+# Contributing to Arcana
 
-Thanks for your interest in contributing to CoreSpec — the core spec-driven
+Thanks for your interest in contributing to Arcana — the spec-driven
 development framework for AI agents.
 
 ## Ways to contribute
@@ -33,8 +33,13 @@ and lets maintainers weigh in on direction before you invest time.
    python3 scripts/validate.py
    ```
    It checks front-matter, that every agent has a matching skill, that the spec
-   template sections appear in `software-architect` and `product-manager`, and
-   that the `spec-driver` phases match across the agent, skill, and README.
+   template sections appear in `software-architect` and `product-manager`, that
+   the ADR and SDR templates appear in `software-architect` and
+   `devsecops-architect`, that every record under `docs/adr/` and `docs/sdr/`
+   is well-formed, and that the `spec-driver` phases match across the agent,
+   skill, and README.
+   Significant changes to Arcana itself get an ADR in `docs/adr/`; changes to
+   its security posture get an SDR in `docs/sdr/`.
 5. If you touched an agent or skill file, manually run the relevant install
    script against a scratch directory and confirm the file lands where
    expected:

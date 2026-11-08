@@ -31,7 +31,7 @@ Save as `specs/CONSTITUTION.md`.
 - [Banned or restricted dependencies and licences]
 
 ## Exceptions
-A spec may break a principle only by recording it in a `## Constitution Exceptions` section of the spec with the principle ID, the reason, and the approver.
+A spec may break a principle only by recording the exception as a decision record: an ADR (`docs/adr/`), or an SDR of type Exception (`docs/sdr/`) when the principle is a security one. The record names the principle ID, the reason, and the approver, and is listed in the spec's `## Decision Records`.
 
 ## Amendments
 | Date | Version | Change | Reason | Approved by |

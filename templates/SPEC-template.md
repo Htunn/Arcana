@@ -37,8 +37,12 @@
 
 ## Open Questions
 [Must be empty before Status changes to Approved. Give each an owner and a due date.
-Mark unresolved ambiguity inline as `[NEEDS CLARIFICATION: question]` — never guess.]
+Mark unresolved ambiguity inline as `[NEEDS CLARIFICATION: question — recommended: X]` — never guess.
+Every question lists 2–4 options and one recommendation, prefilled as the default answer, so the human only confirms, picks another option, or writes a custom answer.]
 - OQ-1: [question] — owner: [name], due: [date]
+  - Options: (A) [option] · (B) [option] · (C) [option]
+  - **Recommended**: (A) — [one-sentence reason]
+  - **Answer**: (A) Recommended — pending human confirmation. Replace with another option or a custom answer to override.
 
 ## Technical Design
 [To be completed by Software Architect]
@@ -58,11 +62,21 @@ Mark unresolved ambiguity inline as `[NEEDS CLARIFICATION: question]` — never 
 ### Dependencies
 [External services, libraries, internal systems — with their SLAs if known]
 
+### Research & Assumptions
+[Facts the design relies on, each verified or marked as an assumption: library versions and compatibility, benchmarks, vendor limits, organisational standards. Cite the source.]
+
 ## Infrastructure & Operations
 [To be completed by Platform Architect]
 
 ## Security Requirements
 [To be completed by DevSecOps Architect]
+
+## Decision Records
+[List every ADR (`docs/adr/`) and SDR (`docs/sdr/`) this spec created or depends on, including any exception to the project constitution. Write "None" if the design needs no significant decision. Records stay `Proposed` until the human approves the spec.]
+
+| ID | Title | Status | Owner role |
+|----|-------|--------|------------|
+| | | | |
 
 ## Implementation Notes
 [Filled in by engineers when they deviate from the spec — leave empty initially]

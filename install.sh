@@ -7,7 +7,7 @@ usage() {
   cat <<EOF
 Usage: ./install.sh [--project <repo-path>] [--keep-attribution]
 
-Installs CoreSpec Claude Code agents.
+Installs Arcana Claude Code agents.
 
   (default)              User scope: \${CLAUDE_CONFIG_DIR:-~/.claude}/agents/
   --project <repo-path>  Project scope: <repo-path>/.claude/agents/ (commit it to

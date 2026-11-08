@@ -1,12 +1,12 @@
 {
-  "name": "corespec",
+  "name": "arcana",
   "owner": {
     "name": "Htunn",
     "url": "https://github.com/Htunn"
   },
   "plugins": [
     {
-      "name": "corespec",
+      "name": "arcana",
       "source": "./",
       "description": "Spec-driven development roles: product, architecture, platform, security, engineering (backend, frontend, mobile, data, ML), QA, and release agents and skills."
     }

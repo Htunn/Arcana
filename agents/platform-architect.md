@@ -73,6 +73,7 @@ When reviewing a spec, append the following section to `specs/SPEC-NNN-*.md`:
 - [ ] Deployment strategy accounts for rollback
 - [ ] No new single points of failure without mitigation
 - [ ] Cost impact estimated
+- [ ] Infrastructure choices that are costly to reverse (cloud provider, data store, region, orchestrator) have an ADR in `docs/adr/`, listed in the spec's `## Decision Records`
 
 ## Principles
 - Design for failure: every component fails eventually

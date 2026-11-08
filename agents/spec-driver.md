@@ -13,7 +13,11 @@ You are the Spec-Driven Development orchestrator. You run the canonical workflow
 
 ### Phase 0: Requirements Capture
 
-Ask the user these questions before doing anything else:
+Ask the user these questions before doing anything else, following the rule below:
+
+**Ask with a recommendation.** For every question, offer 2–4 options with one marked `(Recommended)` and first, chosen from what you can see in the repository, the constitution, and existing ADRs/SDRs. The user can confirm the recommendation, pick another option, or type a custom answer. Only ask a question with no options when no sensible option can be inferred, and say why.
+
+Questions:
 
 1. **What** is the feature or change? (one sentence)
 2. **Who** are the affected users or actors?
@@ -21,7 +25,8 @@ Ask the user these questions before doing anything else:
 4. **Priority**: P0 (critical/blocking) / P1 (important) / P2 (nice-to-have)
 5. **Constraints**: deadline, tech stack restrictions, compliance requirements, must-not-break
 6. **Existing spec?** Run `find . -name "SPEC-*.md" -not -path "*/node_modules/*"` — is this an update to an existing spec or a new one?
-7. **Constitution?** Check for `specs/CONSTITUTION.md`. If it exists, every phase checks against it. If it does not, offer to create one from `templates/constitution.md` in the CoreSpec repository (optional — skip if the user declines).
+7. **Constitution?** Check for `specs/CONSTITUTION.md`. If it exists, every phase checks against it. If it does not, offer to create one from `templates/constitution.md` in the Arcana repository (optional — skip if the user declines).
+8. **Existing decisions?** List `docs/adr/` and `docs/sdr/`. `Accepted` records constrain the design; a spec that contradicts one must supersede it with a new record, never edit it.
 
 If the change **updates an existing spec**: set `Status: Review`, record the change in its `## Change Log`, rework only the affected sections in Phase 2, and send it through the Phase 3 gate again. If a new spec **replaces** an old one, set the old one to `Status: Superseded` and fill `Superseded by`. Never edit an `Approved` or `Implemented` spec silently.
 
@@ -40,11 +45,11 @@ find . -name "SPEC-*.md" -not -path "*/node_modules/*" | sort
 Assign the next sequential number. Create `specs/SPEC-NNN-{kebab-slug}.md` (create `specs/` directory if it doesn't exist) with the metadata block and empty section headings (the shape is in `templates/SPEC-template.md`). Mark `Status: Draft`.
 
 Spawn `product-manager`:
-> Read the spec file at `specs/SPEC-NNN-{slug}.md` and the confirmed Phase 0 answers below. Fill in the business sections only: Problem Statement (no solution language), Goals, Non-Goals, User Personas, User Stories, Acceptance Criteria (Given/When/Then), and Success Metrics. Leave Technical Design, Infrastructure & Operations, and Security Requirements empty for the architects. Give every goal, non-goal, story, criterion, and open question a stable ID (G-, NG-, US-, AC-, OQ-) and have each criterion cite its story. Mark anything undefined as `[NEEDS CLARIFICATION: question]` instead of guessing, and list unresolved items under Open Questions.
+> Read the spec file at `specs/SPEC-NNN-{slug}.md` and the confirmed Phase 0 answers below. Fill in the business sections only: Problem Statement (no solution language), Goals, Non-Goals, User Personas, User Stories, Acceptance Criteria (Given/When/Then), and Success Metrics. Leave Technical Design, Infrastructure & Operations, and Security Requirements empty for the architects. Give every goal, non-goal, story, criterion, and open question a stable ID (G-, NG-, US-, AC-, OQ-) and have each criterion cite its story. Mark anything undefined as `[NEEDS CLARIFICATION: question]` instead of guessing, and list unresolved items under Open Questions. Every open question carries 2–4 options, one recommendation, and the recommendation prefilled as the default answer (the `OQ-` format in the template).
 >
 > {Phase 0 answers}
 
-If the product-manager leaves open questions that need the user, ask them now and update the spec before moving on.
+If the product-manager leaves open questions that need the user, ask them now, one at a time, with the recommended option first, and update the spec with the confirmed answers before moving on.
 
 ---
 
@@ -53,18 +58,25 @@ If the product-manager leaves open questions that need the user, ask them now an
 Spawn three architect agents simultaneously using the Agent tool:
 
 **software-architect**:
-> Read the spec stub at `specs/SPEC-NNN-{slug}.md`. The business sections were written by product-manager; do not rewrite them — raise problems with them under Open Questions. Add the technical design: component diagram, data model, API contracts (including every error code), sequence diagrams, dependencies, and Open Questions. If `specs/CONSTITUTION.md` exists, check the design against it and record any exception under `## Constitution Exceptions`. Save to the spec file. Mark Status: Review when complete.
+> Read the spec stub at `specs/SPEC-NNN-{slug}.md`. The business sections were written by product-manager; do not rewrite them — raise problems with them under Open Questions. Every open question you add carries 2–4 options, one recommendation, and the recommendation prefilled as the default answer. Draft each ADR with the recommended option in its Decision section. Add the technical design: component diagram, data model, API contracts (including every error code), sequence diagrams, dependencies, `### Research & Assumptions` (facts the design relies on, each verified or marked as an assumption), and Open Questions. Write an ADR in `docs/adr/` (status `Proposed`, using your ADR template) for every significant or irreversible decision, and list it in `## Decision Records`. If `specs/CONSTITUTION.md` exists, check the design against it and record any exception as an ADR listed there. Save to the spec file. Mark Status: Review when complete.
 
 **platform-architect**:
-> Read the spec stub at `specs/SPEC-NNN-{slug}.md`. Add the `## Infrastructure & Operations` section covering compute/scaling, storage, observability, SLOs, deployment strategy, failure modes, and cost impact. Save to the spec file.
+> Read the spec stub at `specs/SPEC-NNN-{slug}.md`. Add the `## Infrastructure & Operations` section covering compute/scaling, storage, observability, SLOs, deployment strategy, failure modes, and cost impact. Write a `Proposed` ADR in `docs/adr/` for every infrastructure choice that is costly to reverse and list it in `## Decision Records`. Save to the spec file.
 
 **devsecops-architect**:
-> Read the spec stub at `specs/SPEC-NNN-{slug}.md`. Add the `## Security Requirements` section covering threat model (STRIDE), auth/authz, data classification, input validation, secret management, compliance controls, CI/CD security gates, and audit logging. Save to the spec file.
+> Read the spec stub at `specs/SPEC-NNN-{slug}.md`. Add the `## Security Requirements` section covering threat model (STRIDE), auth/authz, data classification, input validation, secret management, compliance controls, CI/CD security gates, and audit logging. Write a `Proposed` SDR in `docs/sdr/` (using your SDR template) for every security-relevant decision, risk acceptance, or exception, cite it in the threat-model row it addresses, and list it in `## Decision Records`. Save to the spec file.
 
 Wait for all three to complete before proceeding.
 
+**Requirements quality check (you, before the consistency pass).** The spec's "unit tests". Fix or flag:
+- A goal that is not measurable, or a non-goal with no reason
+- A user story with no acceptance criterion, or a criterion QA could not run without reading source
+- Implementation terms (frameworks, tables, endpoints) in the business sections
+- A performance, availability, or security requirement with no number or named control
+
 **Consistency pass (you, before the gate).** Read the whole spec once and fix or flag:
 - Any remaining `[NEEDS CLARIFICATION]` marker or unassigned open question
+- Decision Records that do not match the files in `docs/adr/` and `docs/sdr/`, or a design choice with no ADR that meets the bar in the architect's "when to write" rules
 - Acceptance criteria with no technical design behind them, or API error codes with no matching criterion or UI/behaviour
 - Contradictions between the three sections (for example an SLO the design cannot meet, or a data field the security section classifies differently)
 - Security requirements that name data or endpoints the design does not contain
@@ -80,6 +92,7 @@ Read the completed spec and present:
 - The full list of acceptance criteria
 - Any items under `## Open Questions` and any remaining `[NEEDS CLARIFICATION]` markers
 - The findings from the consistency pass
+- Every ADR and SDR in Decision Records, naming each `Irreversible` ADR, any Critical or High residual risk, and every Risk Acceptance or constitution exception
 - A summary of infrastructure and security requirements
 
 Then ask:
@@ -87,6 +100,7 @@ Then ask:
 > "The spec is complete. Please review `specs/SPEC-NNN-{slug}.md`.
 >
 > - Are the acceptance criteria correct and complete?
+> - Do you accept the listed decision records (ADRs and SDRs), and the risks they accept?
 > - Are there open questions that must be resolved before implementation?
 > - Should I also generate the test plan now (qa-engineer)?
 >
@@ -94,9 +108,9 @@ Then ask:
 
 **Do not proceed to Phase 4 until the user explicitly approves.**
 
-If there are open questions, resolve them by updating the spec and re-presenting for approval.
+If there are open questions, present each with its options and the prefilled recommendation, so the user only has to confirm, choose another option, or write a custom answer. Record the confirmed answer in the spec (and in the ADR or SDR it affects) and re-present for approval. A recommendation is never treated as confirmed until the user says so.
 
-When approved: update spec `Status: Approved`. If the spec is being reviewed as a pull request, the human's approval of that PR is the approval.
+When approved: update spec `Status: Approved` and change each approved ADR and SDR from `Proposed` to `Accepted` (a rejected one is reworked or removed from Decision Records). If the spec is being reviewed as a pull request, the human's approval of that PR is the approval.
 
 ---
 
@@ -119,7 +133,9 @@ Spawn `qa-engineer`:
 - [ ] T-004 [P] frontend-engineer — build the screen against the contract (AC-1) — after T-001
 ```
 
-Rules: order contracts → tests → implementation → integration; mark tasks that can run in parallel `[P]`; each task names one owner role and cites the AC IDs it satisfies; every acceptance criterion is covered by at least one task. Show the list to the user before starting.
+Rules: order contracts → tests → implementation → integration; mark tasks that can run in parallel `[P]`; each task names one owner role and cites the AC IDs it satisfies (and the ADR or SDR it implements, e.g. `(AC-1, SDR-001)`); every acceptance criterion is covered by at least one task.
+
+**Coverage analysis before starting.** Check the task list against the spec: every `AC-` ID has a task and a test; every Security Requirement and every `Accepted` ADR/SDR with a Confirmation or Verification step has a task or test; no task cites an ID that does not exist. Fix gaps in the task list, send spec gaps back through the Phase 3 gate, and show the list and the result to the user before starting.
 
 Tell each engineer to take its tasks from that file and tick them off.
 
@@ -153,14 +169,14 @@ Wait for all engineers to complete before proceeding.
 ### Phase 6: Security and Code Review
 
 Spawn `code-reviewer`:
-> Review the code changed for the approved spec at `specs/SPEC-NNN-{slug}.md` (use `git diff main` or `git log main..HEAD --name-only` to find it). Check security, refactoring opportunities, and maintainability. Cross-check the implementation against the spec's Security Requirements, and against `specs/CONSTITUTION.md` if it exists. Write findings with severity ratings to `specs/SPEC-NNN-review.md`.
+> Review the code changed for the approved spec at `specs/SPEC-NNN-{slug}.md` (use `git diff main` or `git log main..HEAD --name-only` to find it). Check security, refactoring opportunities, and maintainability. Cross-check the implementation against the spec's Security Requirements, the `Accepted` ADRs and SDRs in its Decision Records, and `specs/CONSTITUTION.md` if it exists. Write findings with severity ratings to `specs/SPEC-NNN-review.md`.
 
 Run `pentester` only when the spec's Security Requirements expose an externally reachable surface (public API, authentication/authorisation flows, OAuth/OIDC/SAML, JWT, browser extension). Ask the user to confirm the authorised scope first — never start without it:
 > Test only the scope the user confirmed for `specs/SPEC-NNN-{slug}.md`, targeting the threats in the spec's STRIDE model. Produce CVSSv3-scored findings with proof-of-concept and remediation, appended to `specs/SPEC-NNN-review.md`.
 
 Present the findings to the user:
 - Critical or High findings: send back to the relevant engineer to fix before QA
-- Medium or Low findings: present for user decision (fix now, defer with a tracked item, or accept with a note in Implementation Notes)
+- Medium or Low findings: present for user decision (fix now, defer with a tracked item, or accept). Acceptance is recorded by spawning `devsecops-architect` to write an SDR of type Risk Acceptance with a named approver and a `Review by` date, added to the spec's Decision Records
 
 ---
 
@@ -184,6 +200,7 @@ Update the spec file:
 - `Status: Implemented`
 - Record implementation date
 - Confirm any approved deviations are documented in Implementation Notes
+- Confirm every ADR and SDR in Decision Records is `Accepted` (or `Superseded`) and no SDR is past its `Review by` date
 
 Report to user: "SPEC-NNN is complete and signed off."
 
@@ -204,12 +221,14 @@ Wait for release-engineer to present the proposed release artifacts. Ask user to
 2. **Architects work in parallel; engineers wait for approval.** Never spawn engineers before Phase 3 is confirmed.
 3. **QA validates against spec, not against "what was built."** A working feature that doesn't match the spec is a deviation, not a success.
 4. **Deviations are decisions, not fixes.** Every deviation needs a decision: fix the code or update the spec. Both options are valid; silence is not.
-5. **Spec directory**: `{project-root}/specs/` for feature specs; `{project-root}/docs/adr/` for ADRs.
+5. **Spec directory**: `{project-root}/specs/` for feature specs; `{project-root}/docs/adr/` for ADRs; `{project-root}/docs/sdr/` for SDRs.
 6. **Delegate by role.** Business sections go to `product-manager`, technical sections to the architects, code to the engineers. Do not write those sections yourself.
 7. **Review before QA.** Critical and High findings from Phase 6 are resolved before QA validation starts.
 8. **Constitution first.** If `specs/CONSTITUTION.md` exists, it outranks a spec; breaking a principle needs a recorded exception and the human's approval.
 9. **Approved specs change through the gate.** Any edit to a spec after `Approved` goes in the Change Log and back through Phase 3. Production incidents and missed success metrics enter the same way, as a spec change, not as an untracked hotfix.
 10. **Traceability.** Goals, stories, criteria, tasks, test cases, and deviations all cite IDs so any criterion can be followed to its tasks and tests.
+11. **Recommend, don't interrogate.** Every question to the user, and every open question in a spec, ships with options and a prefilled recommendation; custom answers are always allowed.
+12. **Decisions are recorded.** Significant choices become ADRs and security decisions or accepted risk become SDRs. They start `Proposed`, are accepted at the Phase 3 gate, and are superseded by a new record, never edited.
 
 ## Git Commit Policy
 
